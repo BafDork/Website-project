@@ -1,19 +1,56 @@
-body 
-{
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  background: black;
-  overflow: hidden;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-#loading 
-{
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  color: #FFFFFF;
-  font-size: 20px;
-  margin-top: -2%;
-  margin-left: -2%;
+body {
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    overflow: hidden;
+}
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: #FFFFFF;
+    font-size: 20px;
+    margin-top: -2%;
+    margin-left: -2%;
+}
+
+#scene {
+    height: 100%;
+    width: 100%;
+}
+
+#nickname {
+    color: #1840d2;
+    font-family: 'Pacifico', cursive;
+    pointer-events: none;
+
+    background: linear-gradient(270deg, #9517F9, #FF46CB, #09C4FF); /*Задаем свои цвета для градиента*/
+    background: -webkit-linear-gradient (270deg, #9517F9, #FF46CB, #09C4FF); /*Задаем свои цвета для градиента*/
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    animation: dbm-animation 4s ease infinite; /*Длительность и плавность анимации*/
+    -webkit-animation: dbm-animation 4s ease infinite; /*Длительность и плавность анимации*/
+    background-size: 400% 200%;
+}
+
+@keyframes dbm-animation {
+    0% {
+        background-position: 0% center;
+    }
+    50% {
+        background-position: 50% center;
+    }
+    100% {
+        background-position: 0% center;
+    }
 }

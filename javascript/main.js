@@ -1,95 +1,84 @@
-import {initClouds, animateClouds} from './cloud_sys.js';
+import {initContent, animateContent} from './content.js';
+import {getEffectPass, animateCircle} from './postprocessing.js';
+import {AmbientLight, SpotLight} from './light.js';
+import {Camera} from './camera.js';
 
-let scene, camera, renderer, composer, stats;
-let tex_loader, background, flash;
-let clouds1 = [], clouds2 = [], clouds3 = [];
+let scene, camera, renderer, cssRenderer, composer, stats, gui;
 
 function init()
 {
+	initGui();
+
 	initScene();
 	initCamera();
 	initRenderer();
+	initCssRenderer();
 	initPostprocessing();
 
-	initLoaders();
 	initControls();
 	initEventListeners();
 
 	initAxesHelper();
 	initStats();
-	
-	initBackground();
 
 	initLights();
-	initClouds(scene, clouds1, 50, 1.2, 1, 10, 0xFFA733);
-	initClouds(scene, clouds2, 40, 0.8, 0.8, 9.9, 0xFF7400);
-	initClouds(scene, clouds3, 30, 0.6, 1, 9.8, 0xE60042);
+	initContent(scene, gui);
 
 	removeLoading();
 	render();
 }
 
-function initScene() 
+function initScene()
 {
 	scene = new THREE.Scene();
 }
 
-function initCamera() 
+function initCamera()
 {
-	camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-	camera.position.set(0, 0, 11);
+	camera = new Camera(60, window.innerWidth / window.innerHeight, 1, 1000);
+	camera.setPosition([0, 0, 17.3]);
 }
 
 function initRenderer()
 {
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+	document.querySelector('#scene').appendChild(renderer.domElement);
+}
+
+function initCssRenderer()
+{
+	cssRenderer = new THREE.CSS3DRenderer();
+	cssRenderer.setSize(window.innerWidth, window.innerHeight);
+	cssRenderer.domElement.style.position = 'absolute';
+	cssRenderer.domElement.style.top = '0';
+	document.querySelector('#scene').appendChild(cssRenderer.domElement);
 }
 
 function initPostprocessing()
 {
-	const bloomEffect = new POSTPROCESSING.BloomEffect(
-	{
-		blendFunction: POSTPROCESSING.BlendFunction.COLOR_DODGE,
-		kernelSize: POSTPROCESSING.KernelSize.SMALL,
-		useLuminanceFilter: true,
-		luminanceThreshold: 0.3,
-		luminanceSmoothing: 0.75
-	});
-	bloomEffect.blendMode.opacity.value = 1.5;
-
-	let effectPass = new POSTPROCESSING.EffectPass(
-		camera,
-		bloomEffect
-	);
-	effectPass.renderToScreen = true;
-
+	let renderPass = new POSTPROCESSING.RenderPass(scene, camera.getCamera());
+	let effectPass = getEffectPass(scene, camera.getCamera());
 	composer = new POSTPROCESSING.EffectComposer(renderer);
-	composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+	composer.addPass(renderPass);
 	composer.addPass(effectPass);
 }
 
-function initLoaders() 
+function initControls()
 {
-	tex_loader = new THREE.TextureLoader();
+	let controls = new THREE.OrbitControls(camera.getCamera(), document.querySelector("#scene")); //!!!!!!!!!!!!!!!!!
+	controls.update();
 }
 
-function initControls() 
-{
-	let controls = new THREE.OrbitControls(camera, renderer.domElement);
-}
-
-function initEventListeners() 
+function initEventListeners()
 {
 	window.addEventListener('resize', onWindowResize);
 	onWindowResize();
 }
 
-function onWindowResize() 
+function onWindowResize()
 {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
+	camera.setAspect(window.innerWidth / window.innerHeight);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -100,58 +89,59 @@ function initAxesHelper()
 	scene.add(axesHelper);
 }
 
-function initStats() 
+function initStats()
 {
 	stats = new Stats();
-	document.body.appendChild(stats.domElement);
+	document.querySelector('#stats').appendChild(stats.domElement);
 }
 
-function initBackground()
-{
-	tex_loader.load("data/background.jpg", function(texture) 
-	{
-		let sphere = new THREE.SphereGeometry(100, 64, 64);
-		let material = new THREE.MeshBasicMaterial(
-			{
-				map: texture,
-				side: THREE.BackSide
-			});
-		background = new THREE.Mesh(sphere, material);
-		scene.add(background);
-	});
-}
+let clouds_light, model_light1, model_light2;
 
 function initLights()
 {
-	let ambient = new THREE.AmbientLight(0xFFFFFF);
-	scene.add(ambient);
+	let ambient = new AmbientLight(0xFFFFFF, 0.7);
+	//ambient.adjust(gui, "AmbientLight");
+	scene.add(ambient.getLight());
 
-	const light = new THREE.SpotLight(0xFFFFFF, 2, 12)
-	light.position.set(0, 0, 12);
+	clouds_light = new SpotLight(0xFFFFFF, 10, 10, Math.PI / 2);
+	clouds_light.setLightPosition([0, 0, 14]);
+	scene.add(clouds_light.getLight());
+	//scene.add(clouds_light.getTarget());
+	//scene.add(clouds_light.getHelper());
+	//clouds_light.adjust(gui, "Clouds Light");
 
-	scene.add(light);
-	scene.add(light.target);
+	model_light1 = new SpotLight(0xFFFFFF, 4.2, 10.1, 0.095);
+	model_light1.setLightPosition([0, 0.66, 20]);
+	model_light1.setTargetPosition([0, -3, 0]);
+	//scene.add(model_light1.getLight());
+	//scene.add(model_light1.getTarget());
+	//scene.add(model_light1.getHelper());
+	//model_light1.adjust(gui, "Model Light 1");
 
-	const helper = new THREE.SpotLightHelper(light);
-	// const helper = new THREE.PointLightHelper(light);
-	// const helper = new THREE.DirectionalLightHelper(directionalLight);
-	scene.add(helper);
-
-	function updateLight() {
-		// directionalLight.target.updateMatrixWorld();
-	  	light.target.updateMatrixWorld();
-	  	helper.update();
-	}
-	updateLight();
-
-	flash = new THREE.PointLight(0xFFFFFF, 30, 500, 1.7);
-	flash.position.set(200, 300, 100);
-	scene.add(flash);
+	model_light2 = new SpotLight(0xFFFFFF, 1, 11, 0.21);
+	model_light2.setLightPosition([4, 7, 20]);
+	model_light2.setTargetPosition([-8, -20, 5]);
+	//scene.add(model_light2.getLight());
+	//scene.add(model_light2.getTarget());
+	//scene.add(model_light2.getHelper());
+	//model_light2.adjust(gui, "Model Light 2");
 }
 
-function removeLoading() 
+function initGui()
 {
-   document.getElementById('loading').style.display = 'none';
+	gui = new dat.GUI();
+}
+
+function updateLights()
+{
+	clouds_light.update();
+	model_light1.update();
+	model_light2.update();
+}
+
+function removeLoading()
+{
+	document.getElementById('loading').style.display = 'none';
 }
 
 //---------------------------------------------------------
@@ -160,35 +150,13 @@ function render()
 {
 	stats.update();
 
-	animateFlash();
-	animateBackground();
-	animateClouds(clouds1, -0.001);
-	animateClouds(clouds2, 0.0015);
-	animateClouds(clouds3, -0.002);
+	updateLights();
+	animateContent();
+	animateCircle();
 
+	cssRenderer.render(scene, camera.getCamera());
 	requestAnimationFrame(render);
 	composer.render(0.1);
-}
-
-function animateBackground()
-{
-	if (background) 
-	{
-		background.rotation.y -= 0.0005;
-	}
-}
-
-function animateFlash()
-{
-	if (Math.random() > 0.95 || flash.power > 200)
-	{
-		if (flash.power < 100) flash.position.set(
-			Math.random() * 400,
-			300 + Math.random() * 200,
-			100
-			);
-		flash.power = 50 + Math.random() * 500;
-	}
 }
 
 init();
