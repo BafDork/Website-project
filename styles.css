@@ -31,8 +31,8 @@ body {
     font-family: 'Pacifico', cursive;
     pointer-events: none;
 
-    background: linear-gradient(270deg, #9517F9, #FF46CB, #09C4FF); /*Задаем свои цвета для градиента*/
-    background: -webkit-linear-gradient (270deg, #9517F9, #FF46CB, #09C4FF); /*Задаем свои цвета для градиента*/
+    background: linear-gradient(270deg, #1aff00, #0073ff, #f1eaea); /*Задаем свои цвета для градиента*/
+    background: -webkit-linear-gradient (270deg, #1aff00, #0073ff, #f1eaea); /*Задаем свои цвета для градиента*/
     background-clip: text;
     -webkit-background-clip: text;
     text-fill-color: transparent;
