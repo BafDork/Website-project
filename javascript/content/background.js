@@ -2,29 +2,23 @@ export class Background
 {
     constructor(scene)
     {
-        this.initLoaders();
         this.initBackground();
-
         scene.add(this._background);
-    }
-
-    initLoaders()
-    {
-        this._texLoader = new THREE.TextureLoader();
     }
 
     initBackground()
     {
-        let texture = this._texLoader.load("data/background.jpeg");
+        let textureLoader = new THREE.TextureLoader();
+        let texture = textureLoader.load("data/background.jpeg");
+
         let sphere = new THREE.SphereGeometry(100, 64, 64);
-        let material = new THREE.MeshBasicMaterial(
-            {
-                map: texture,
-                side: THREE.BackSide
-            });
+        let material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.BackSide
+        });
+
         this._background = new THREE.Mesh(sphere, material);
         this._background.rotation.set(1.7, -0.1, 0);
-
     }
 
     animate()

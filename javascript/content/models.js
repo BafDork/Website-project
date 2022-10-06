@@ -2,12 +2,10 @@ export class Models
 {
     constructor(scene) 
     {
-        this._scene = scene;
-        
         this.initLoaders();
 
-        this.loadMenModel(this);
-        this.initWings();
+        this.loadMenModel(this, scene);
+        this.initWings(scene);
     }
 
     initLoaders()
@@ -17,7 +15,7 @@ export class Models
         this._mtlLoader = new THREE.MTLLoader();
     }
 
-    loadMenModel(self)
+    loadMenModel(self, scene)
     {
         self._mtlLoader.load("data/model/new_obj.mtl", function (materials) {
             materials.preload();
@@ -30,7 +28,6 @@ export class Models
                         part.receiveShadow = true;
                         if (part.material.map) {
                             part.material.map.anisotropy = 16;
-                            //part.material.shininess = 10;
                         }
                     }
                 });
@@ -38,24 +35,23 @@ export class Models
                 object.scale.set(0.01, 0.01, 0.01);
                 object.position.set(0, -1.35, 15);
 
-                self._scene.add(object);
+                scene.add(object);
             });
         });
     }
 
-    initWings()
+    initWings(scene)
     {
-        let material = new THREE.MeshPhysicalMaterial(
-            {
-                transparent: true,
-                transmission: 1
-            });
+        let material = new THREE.MeshPhysicalMaterial({
+            transparent: true,
+            transmission: 1
+        });
 
-        this.loadWingModel(this, "data/wings/right_wing.obj", material, [-2.2, 0.7, 14]);
-        this.loadWingModel(this, "data/wings/left_wing.obj", material, [-3.8, 0.7, 14]);
+        this.loadWingModel(this, scene, "data/wings/right_wing.obj", material, [-2.2, 0.7, 14]);
+        this.loadWingModel(this, scene, "data/wings/left_wing.obj", material, [-3.8, 0.7, 14]);
     }
     
-    loadWingModel(self, file, material, position)
+    loadWingModel(self, scene, file, material, position)
     {
         self._objLoader.load(file, function (object) {
             object.traverse(part => {
@@ -66,7 +62,7 @@ export class Models
             object.rotation.x = Math.PI / 2;
             object.position.set(...position);
 
-            self._scene.add(object);
+            scene.add(object);
         });
     }
 }

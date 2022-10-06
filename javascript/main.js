@@ -17,9 +17,9 @@ function init()
 	initStats();
 	initAxesHelper();
 
-	content = new Content(scene, gui);
-
+	initContent();
 	update();
+
 	removeLoading();
 }
 
@@ -33,7 +33,7 @@ function initScene()
 function initCamera()
 {
 	camera = new Camera(60, window.innerWidth / window.innerHeight, 1, 1000);
-	camera.setPosition([0, 0, 17.3]);
+	camera.setPosition(0, 0, 17.3);
 }
 
 function initRenderer()
@@ -45,20 +45,29 @@ function initRenderer()
 
 function initControls()
 {
-	let controls = new THREE.OrbitControls(camera.getCamera(), document.getElementById("scene"));
-	controls.update();
+	window.controls = new THREE.OrbitControls(camera.getCamera(), document.getElementById("scene"));
 }
 
 function initEventListeners()
 {
 	window.addEventListener('resize', onWindowResize);
-	onWindowResize();
+	document.addEventListener('pointermove', pointerMove);
 }
 
-function onWindowResize()
+function onWindowResize(event)
 {
 	camera.setAspect(window.innerWidth / window.innerHeight);
-	renderer.setSize(window.innerWidth, window.innerHeight);
+	camera.updateProjectionMatrix();
+
+	renderer.webGLRendererSetSize(window.innerWidth, window.innerHeight);
+	renderer.cssRendererSetSize(window.innerWidth, window.innerHeight);
+
+	content.eventListener(event);
+}
+
+function pointerMove(event)
+{
+	content.eventListener(event);
 }
 
 //---------------------------------------------------------
@@ -81,11 +90,16 @@ function initAxesHelper()
 	scene.add(axesHelper);
 }
 
-//---------------------------------------------------------
-
 function removeLoading()
 {
 	document.getElementById('loading').style.display = 'none';
+}
+
+//---------------------------------------------------------
+
+function initContent()
+{
+	content = new Content(scene, renderer.getWebGLRenderer(), gui);
 }
 
 function update()

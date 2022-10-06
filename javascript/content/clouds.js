@@ -11,18 +11,19 @@ export class Clouds
 
 	constructor()
 	{
+		this._scene = arguments[arguments.length - 1]
 		this.setParams(...arguments)
 
-		this._clouds = this.initClouds(this._params);
-		this._scene = arguments[arguments.length - 1]
-
-		this.addToScene();
+		this.initClouds();
 	}
 
-	initClouds(params)
+	initClouds()
 	{
-		let clouds = [];
-		let texture = new tex_loader.load('data/smoke.png')
+		let params = this._params;
+		this._clouds = [];
+
+		let tex_loader = new THREE.TextureLoader();
+		let texture = new tex_loader.load('data/smoke.png');
 
 		let cloudGeo = new THREE.PlaneBufferGeometry(params.size, params.size);
 		let cloudMaterial = new THREE.MeshLambertMaterial(
@@ -42,11 +43,10 @@ export class Clouds
 
 			cloud.position.set(...coords, params.position);
 			cloud.rotation.z = Math.random() * 2 * Math.PI;
-		
-			clouds.push(cloud);
-		}
 
-		return clouds;
+			this._clouds.push(cloud);
+			this._scene.add(cloud);
+		}
 	}
 
 	adjust(gui, name) 
@@ -83,18 +83,7 @@ export class Clouds
 
 	animate(angle)
 	{
-		this._clouds.forEach(i => 
-		{
-			i.rotation.z += angle;
-		});
-	}
-
-	addToScene()
-	{
-		this._clouds.forEach(i => 
-		{
-			this._scene.add(i);
-		});
+		this._clouds.forEach(i => i.rotation.z += angle);
 	}
 
 	setParams(count, radius, size, position, color)
@@ -106,8 +95,6 @@ export class Clouds
 		this._params.color = color;
 	}
 }
-
-let tex_loader = new THREE.TextureLoader();
 
 function polar_to_rectangular(radius, angle)
 {

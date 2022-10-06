@@ -1,8 +1,9 @@
 export class AmbientLight
 {
-	constructor() 
+	constructor(scene, color, intensity)
 	{
-		this._light = new THREE.AmbientLight(...arguments);
+		this._light = new THREE.AmbientLight(color, intensity);
+		scene.add(this._light);
 	}
 
   	adjustLight(gui, name) 
@@ -11,26 +12,26 @@ export class AmbientLight
 		folder.add(this._light, "intensity", 0, 5);
 		folder.addColor(new ColorGUIHelper(this._light, "color"), "value").name("color");
 	}
-
-	getLight()
-	{
-		return this._light;
-	}
 }
 
 
 export class SpotLight
 {
-	constructor() 
+	constructor(scene, color, intensity, distance, angle, penumbra, decay)
 	{
-		this._light = new THREE.SpotLight(...arguments);
-		this._helper = new THREE.SpotLightHelper(this._light);
+		this._scene = scene;
+
+		this._light = new THREE.SpotLight(color, intensity, distance, angle, penumbra, decay);
+		scene.add(this._light);
 	}
 
  	 adjust(gui, name) 
 	{
 		let light = this._light;
 		let target = this._light.target;
+
+		let helper = new THREE.SpotLightHelper(this._light);
+		this._scene.add(helper);
 
 		let lightFolder = gui.addFolder(name);
 		lightFolder.add(light, "intensity", 0, 10);

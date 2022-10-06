@@ -10,6 +10,12 @@ export class Nickname
 
     constructor(scene)
     {
+        this.initNickname();
+        scene.add(this._nickname);
+    }
+
+    initNickname()
+    {
         this._element = document.getElementById('nickname');
         this._nickname = new THREE.CSS3DObject(this._element);
 
@@ -21,8 +27,6 @@ export class Nickname
         let age = date.getUTCFullYear() - 2003;
         if (date.getUTCMonth() === 0 && date.getUTCDate() < 28) age -= 1;
         this._element.innerHTML = "Еугений Чернов " + age + "lvl"
-
-        scene.add(this._nickname);
     }
 
     animate()

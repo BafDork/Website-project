@@ -20,15 +20,20 @@ export class Camera
 	 //    scene.add(line);
 	}
 
-	setPosition(position) 
+	updateProjectionMatrix()
 	{
-		this._camera.position.set(...position);
+		this._camera.updateProjectionMatrix();
+	}
+
+	setPosition(x, y, z)
+	{
+		this._camera.position.set(x, y, z);
 	}
 
 	setAspect(aspect) 
 	{
 		this._camera.aspect = aspect;
-		this._camera.updateProjectionMatrix();
+		this.updateProjectionMatrix()
 	}
 
 	getCamera() 
